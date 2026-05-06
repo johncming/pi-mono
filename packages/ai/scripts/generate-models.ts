@@ -860,12 +860,14 @@ async function loadModelsDevData(): Promise<Model<any>[]> {
 			for (const [modelId, model] of Object.entries(kimiModels)) {
 				const m = model as ModelsDevModel;
 				if (m.tool_call !== true) continue;
-				// models.dev still exposes deprecated "k2p5" in some snapshots.
-				// Normalize to the canonical model id and drop duplicates when canonical exists.
-				if (modelId === "k2p5" && hasCanonicalModel) continue;
+				// models.dev exposes versioned aliases like "k2p5" and "k2p6" alongside
+				// the canonical "kimi-for-coding". Normalize to the canonical id and drop
+				// duplicates when the canonical model exists.
+				const isVersionAlias = modelId === "k2p5" || modelId === "k2p6";
+				if (isVersionAlias && hasCanonicalModel) continue;
 
-				const normalizedId = modelId === "k2p5" ? "kimi-for-coding" : modelId;
-				const normalizedName = modelId === "k2p5" ? "Kimi For Coding" : m.name || normalizedId;
+				const normalizedId = isVersionAlias ? "kimi-for-coding" : modelId;
+				const normalizedName = isVersionAlias ? "Kimi For Coding" : m.name || normalizedId;
 
 				models.push({
 					id: normalizedId,
